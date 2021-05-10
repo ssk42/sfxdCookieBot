@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
-const { giveCommand, token } = require('./config.json');
+const { cookie, token } = require('./config.json');
 
 client.once('ready', () => {
 	console.log('Ready!');
@@ -8,46 +8,50 @@ client.once('ready', () => {
 
 client.on('message', message => {
 
-    if (!message.content.startsWith(giveCommand) || message.author.bot) return;
+    if (!message.content.startsWith(cookie) || message.author.bot) return;
 
-    const args = message.content.slice(giveCommand.length).trim().split(' ');
-    const emoji= args[0];
-    message.channel.send(':'+emoji+':');
+    const args = message.content.slice(cookie.length).trim().split(' ');
+    const cookieEmoji= ':cookie:';
+    const taggedUsers=message.mentions.users;
+    const givenCookieMessage=': you have been given a cookie. Enjoy the chocolate-y goodness.';
+    const botMessage='You cannot send cookies to bots. Bots cannot enjoy the ooey or the gooey of a cookie.';
+
+    message.channel.send(cookieEmoji);
     if (!args.length) {
-        return message.channel.send(`You didn't provide any arguments, ${message.author}!`);
+        return message.channel.send(`You didn't provide any users to give a cookie to, ${message.author}!`);
     }
-	else if (message.content.startsWith(giveCommand+ emoji)) {
+	else if (message.content.startsWith(cookie)) {
         let taggedUser='';
         
-        if (message.mentions.users.size===1){
-            taggedUser = message.mentions.users.first();
+        if (taggedUsers.size===1){
+            taggedUser = taggedUsers.first();
             if (!taggedUser.bot) {
-                message.channel.send('<@'+taggedUser.id+'>: you have been given a ' + emoji+'. Enjoy the chocolate-y goodness.');
+                message.channel.send('<@'+taggedUser.id+'>'+givenCookieMessage);
             } else {
-                message.channel.send('You cannot send cookies to bots. Bots cannot enjoy the ooey or the gooey of a cookie.');
+                message.channel.send(botMessage);
             }
             return;
         }
         else{
-            for (let [key,value] of message.mentions.users) {
-                if(!value.bot){
-                    const tagOfUser='<@'+value.id+'>';
+            for (let [user,userInfo] of taggedUsers) {
+                if(!userInfo.bot){
+                    let tagOfUser='';
+                    
                     if(taggedUser===''){
+                        tagOfUser='<@'+user+'>';
                         taggedUser = tagOfUser;
                     }
                     else{
+                        tagOfUser='<@'+user+'>';
                         taggedUser = taggedUser+', '+tagOfUser;
                     }
-                    message.channel.send(taggedUser+': you have been given a ' + emoji+'. Enjoy the chocolate-y goodness.');
-                    return;
                 }
                 else{
-                    message.channel.send('You cannot send cookies to bots. Bots cannot enjoy the ooey or the gooey of a cookie.');
+                    message.channel.send(botMessage);
                 }
             }
+            message.channel.send(taggedUser+givenCookieMessage);
         }
-        
-
 	}
 });
 
